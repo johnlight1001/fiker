@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>for fiker</title>
+
+<style>
+    :root{
+        --bg:#08090b;
+        --text:#f5f1ee;
+        --muted:#a8a1a0;
+        --rose:#d98c9e;
+        --rose-soft:#edb5c1;
+        --line:rgba(255,255,255,.09);
+        --glass:rgba(255,255,255,.045);
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+        margin:0;
+        width:100%;
+        height:100%;
+        overflow:hidden;
+        font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+        background:var(--bg);
+        color:var(--text);
+    }
+
+    body{
+        position:relative;
+        cursor:default;
+    }
+
+    button{
+        font:inherit;
+    }
+
+    .canvas{
+        position:fixed;
+        inset:0;
+        overflow:hidden;
+        background:
+            radial-gradient(circle at 50% 44%, rgba(217,140,158,.075), transparent 26%),
+            radial-gradient(circle at 16% 18%, rgba(255,255,255,.035), transparent 22%),
+            var(--bg);
+    }
+
+    .orb{
+        position:absolute;
+        width:320px;
+        height:320px;
+        border-radius:50%;
+        filter:blur(100px);
+        opacity:.18;
+        pointer-events:none;
+        transition:transform 1.2s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .orb.a{background:#8b4a61;left:-130px;top:-120px}
+    .orb.b{background:#705166;right:-120px;bottom:-120px}
+    .orb.c{background:#9f6875;left:45%;top:42%;opacity:.11}
+
+    .stars{
+        position:absolute;
+        inset:0;
+        pointer-events:none;
+    }
+
+    .star{
+        position:absolute;
+        width:2px;
+        height:2px;
+        background:#fff;
+        border-radius:50%;
+        opacity:.2;
+        animation:twinkle var(--d) ease-in-out infinite;
+    }
+
+    @keyframes twinkle{
+        0%,100%{opacity:.12;transform:scale(.7)}
+        50%{opacity:.8;transform:scale(1.4)}
+    }
+
+    .noise{
+        position:absolute;
+        inset:0;
+        opacity:.035;
+        pointer-events:none;
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E");
+    }
+
+    .wrap{
+        position:relative;
+        width:100%;
+        height:100%;
+        display:grid;
+        place-items:center;
+        padding:24px;
+        z-index:2;
+    }
+
+    .panel{
+        width:min(680px,92vw);
+        min-height:500px;
+        position:relative;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        text-align:center;
+        padding:42px 32px;
+        border:1px solid var(--line);
+        background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));
+        border-radius:30px;
+        box-shadow:
+            0 30px 100px rgba(0,0,0,.45),
+            inset 0 1px 0 rgba(255,255,255,.035);
+        backdrop-filter:blur(18px);
+        -webkit-backdrop-filter:blur(18px);
+        overflow:hidden;
+        transition:transform .7s ease,opacity .7s ease;
+    }
+
+    .panel::before{
+        content:"";
+        position:absolute;
+        inset:0;
+        pointer-events:none;
+        background:radial-gradient(circle at 50% 5%,rgba(255,255,255,.035),transparent 34%);
+    }
+
+    .eyebrow{
+        font-size:12px;
+        letter-spacing:.14em;
+        text-transform:lowercase;
+        color:#777274;
+        margin-bottom:13px;
+    }
+
+    h1{
+        margin:0;
+        font-size:clamp(46px,8vw,76px);
+        line-height:.94;
+        letter-spacing:-.055em;
+        font-weight:720;
+    }
+
+    .rose{
+        color:var(--rose-soft);
+    }
+
+    .lead{
+        max-width:500px;
+        margin:22px auto 0;
+        color:var(--muted);
+        line-height:1.75;
+        font-size:17px;
+    }
+
+    .tiny{
+        margin-top:12px;
+        font-size:13px;
+        color:#716c6e;
+    }
+
+    .heart-wrap{
+        position:relative;
+        width:150px;
+        height:150px;
+        margin-bottom:25px;
+        display:grid;
+        place-items:center;
+    }
+
+    .ring{
+        position:absolute;
+        width:116px;
+        height:116px;
+        border:1px solid rgba(237,181,193,.18);
+        border-radius:50%;
+        animation:breathe 3s ease-in-out infinite;
+    }
+
+    .ring.r2{
+        width:140px;
+        height:140px;
+        opacity:.35;
+        animation-delay:.35s;
+    }
+
+    .heart-btn{
+        position:relative;
+        width:90px;
+        height:90px;
+        border:none;
+        border-radius:50%;
+        background:rgba(217,140,158,.07);
+        color:var(--rose-soft);
+        font-size:49px;
+        display:grid;
+        place-items:center;
+        cursor:pointer;
+        transition:transform .2s ease,background .2s ease,box-shadow .2s ease;
+        box-shadow:0 0 0 1px rgba(237,181,193,.09), 0 16px 55px rgba(217,140,158,.08);
+    }
+
+    .heart-btn:hover{
+        transform:scale(1.06);
+        background:rgba(217,140,158,.11);
+        box-shadow:0 0 0 1px rgba(237,181,193,.16),0 20px 65px rgba(217,140,158,.14);
+    }
+
+    .heart-btn:active{
+        transform:scale(.96);
+    }
+
+    @keyframes breathe{
+        0%,100%{transform:scale(.94);opacity:.3}
+        50%{transform:scale(1.04);opacity:.7}
+    }
+
+    .actions{
+        margin-top:27px;
+        display:flex;
+        justify-content:center;
+        flex-wrap:wrap;
+        gap:9px;
+    }
+
+    .btn{
+        border:1px solid rgba(237,181,193,.25);
+        border-radius:999px;
+        padding:12px 19px;
+        color:var(--text);
+        background:rgba(255,255,255,.035);
+        cursor:pointer;
+        transition:transform .2s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease;
+    }
+
+    .btn:hover{
+        transform:translateY(-2px);
+        background:rgba(237,181,193,.08);
+        border-color:rgba(237,181,193,.44);
+        box-shadow:0 12px 30px rgba(217,140,158,.08);
+    }
+
+    .btn.primary{
+        background:var(--rose);
+        border-color:var(--rose);
+        color:#1a1215;
+        font-weight:700;
+    }
+
+    .btn.primary:hover{
+        background:var(--rose-soft);
+        border-color:var(--rose-soft);
+    }
+
+    .counter{
+        margin-top:18px;
+        min-height:20px;
+        font-size:13px;
+        color:#777274;
+    }
+
+    .discovery{
+        position:absolute;
+        left:50%;
+        top:50%;
+        transform:translate(-50%,-50%);
+        color:var(--rose-soft);
+        font-size:14px;
+        opacity:0;
+        pointer-events:none;
+        white-space:nowrap;
+        transition:opacity .35s ease,transform .35s ease;
+    }
+
+    .discovery.show{
+        opacity:1;
+        transform:translate(-50%,-50%) translateY(-16px);
+    }
+
+    .story{
+        min-height:155px;
+        display:grid;
+        place-items:center;
+        max-width:520px;
+        font-size:clamp(22px,4vw,30px);
+        line-height:1.5;
+        letter-spacing:-.02em;
+    }
+
+    .story em{
+        color:var(--rose-soft);
+        font-style:normal;
+    }
+
+    .quiet{
+        font-size:13px;
+        color:#767174;
+        margin-top:18px;
+    }
+
+    .final-title{
+        font-size:clamp(36px,7vw,62px);
+        line-height:1.03;
+        letter-spacing:-.05em;
+        max-width:560px;
+    }
+
+    .final-sub{
+        max-width:510px;
+        margin-top:21px;
+        font-size:17px;
+        line-height:1.7;
+        color:var(--muted);
+    }
+
+    .signature{
+        margin-top:21px;
+        font-size:13px;
+        color:#777274;
+    }
+
+    .float{
+        position:fixed;
+        left:0;
+        top:0;
+        z-index:20;
+        pointer-events:none;
+        color:var(--rose-soft);
+        font-size:16px;
+        animation:rise var(--t) cubic-bezier(.17,.67,.32,1) forwards;
+    }
+
+    @keyframes rise{
+        from{
+            opacity:0;
+            transform:translate3d(0,10px,0) scale(.7) rotate(0);
+        }
+        12%{opacity:1}
+        to{
+            opacity:0;
+            transform:translate3d(var(--x),var(--y),0) scale(1.35) rotate(var(--r));
+        }
+    }
+
+    .spark{
+        position:fixed;
+        left:0;
+        top:0;
+        z-index:30;
+        pointer-events:none;
+        color:var(--rose-soft);
+        font-size:13px;
+        animation:spark .72s ease-out forwards;
+    }
+
+    @keyframes spark{
+        from{
+            opacity:1;
+            transform:translate(-50%,-50%) scale(1);
+        }
+        to{
+            opacity:0;
+            transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(.2);
+        }
+    }
+
+    .fade-out{
+        opacity:0;
+        transform:scale(.985);
+        pointer-events:none;
+    }
+
+    .hidden{
+        display:none !important;
+    }
+
+    @media (max-width:640px){
+        .wrap{padding:14px}
+        .panel{min-height:500px;padding:34px 22px;border-radius:26px}
+        .lead{font-size:16px}
+        .story{min-height:170px}
+    }
+</style>
+</head>
+
+<body>
+
+<div class="canvas">
+    <div class="orb a" id="orbA"></div>
+    <div class="orb b" id="orbB"></div>
+    <div class="orb c" id="orbC"></div>
+    <div class="stars" id="stars"></div>
+    <div class="noise"></div>
+</div>
+
+<div class="wrap">
+
+    <!-- OPENING -->
+    <section class="panel" id="opening">
+        <div class="eyebrow">i was bored</div>
+
+        <div class="heart-wrap">
+            <div class="ring"></div>
+            <div class="ring r2"></div>
+
+            <button class="heart-btn" id="mainHeart" aria-label="tap the heart">
+                ♡
+            </button>
+
+            <div class="discovery" id="discovery"></div>
+        </div>
+
+        <h1>hey <span class="rose">fiker</span></h1>
+
+        <div class="lead" id="openingLead">
+            randomly thought of you<br>
+            and started making this
+        </div>
+
+        <div class="tiny" id="openingTiny">
+            apparently this is what i do when i'm bored
+        </div>
+
+        <div class="actions">
+            <button class="btn primary" id="startBtn">okay show me</button>
+        </div>
+
+        <div class="counter" id="tapCounter"></div>
+    </section>
+
+    <!-- STORY -->
+    <section class="panel hidden" id="storyPanel">
+        <div class="eyebrow">okay, one thing</div>
+
+        <div class="story" id="storyText"></div>
+
+        <div class="actions">
+            <button class="btn primary" id="nextBtn">next</button>
+        </div>
+
+        <div class="quiet" id="storyQuiet">keep clicking, i guess</div>
+    </section>
+
+    <!-- FINAL -->
+    <section class="panel hidden" id="finalPanel">
+        <div class="eyebrow">that was it</div>
+
+        <div class="final-title">
+            i made this for you
+        </div>
+
+        <div class="final-sub">
+            i was bored, thought of you, opened my laptop
+            and somehow ended up here
+        </div>
+
+        <div class="signature">
+            took me a while<br>
+            worth it
+        </div>
+
+        <div class="actions">
+            <button class="btn primary" id="lastBtn">one last click</button>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    const $ = (id) => document.getElementById(id);
+
+    const stars = $("stars");
+
+    for(let i = 0; i < 85; i++){
+        const s = document.createElement("span");
+        s.className = "star";
+        s.style.left = Math.random() * 100 + "%";
+        s.style.top = Math.random() * 100 + "%";
+        s.style.setProperty("--d", (2.3 + Math.random() * 3.4) + "s");
+        s.style.animationDelay = (-Math.random() * 4) + "s";
+        stars.appendChild(s);
+    }
+
+    let taps = 0;
+    let started = false;
+    let storyIndex = 0;
+    let typingTimer = null;
+
+    const discoveries = [
+        "okay",
+        "you found one",
+        "still clicking?",
+        "i knew you'd keep going",
+        "alright alright",
+        "one more"
+    ];
+
+    const story = [
+        "i don't really say stuff like this",
+        "but i actually appreciate having you around",
+        "the random conversations",
+        "the stupid jokes",
+        "you being annoying for absolutely no reason",
+        "all that stuff actually means something to me",
+        "i guess that's why when i was bored",
+        "you were the person i randomly thought of",
+        "so i made this",
+        "because you're worth the time"
+    ];
+
+    function showPanel(panel){
+        ["opening","storyPanel","finalPanel"].forEach(id => {
+            $(id).classList.add("hidden");
+        });
+
+        $(panel).classList.remove("hidden");
+    }
+
+    function spark(x,y,count=8){
+        const glyphs = ["✦","·","✧","♡"];
+
+        for(let i=0;i<count;i++){
+            const el = document.createElement("div");
+            el.className = "spark";
+            el.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+            el.style.left = x + "px";
+            el.style.top = y + "px";
+            el.style.setProperty("--x", (Math.random()*90-45) + "px");
+            el.style.setProperty("--y", (Math.random()*90-45) + "px");
+            el.style.color = i % 2 ? "#e8adb9" : "#fff1f4";
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+    }
+
+    function floatHeart(x,y){
+        const el = document.createElement("div");
+        el.className = "float";
+        el.textContent = Math.random() > .35 ? "♡" : "♥";
+        el.style.left = x + "px";
+        el.style.top = y + "px";
+        el.style.setProperty("--x", (Math.random()*160-80) + "px");
+        el.style.setProperty("--y", (-180 - Math.random()*220) + "px");
+        el.style.setProperty("--r", (Math.random()*30-15) + "deg");
+        el.style.setProperty("--t", (2.8 + Math.random()*1.8) + "s");
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 5000);
+    }
+
+    function heartBurst(count=10){
+        const rect = $("mainHeart").getBoundingClientRect();
+        for(let i=0;i<count;i++){
+            setTimeout(() => {
+                floatHeart(
+                    rect.left + rect.width/2,
+                    rect.top + rect.height/2
+                );
+            }, i * 65);
+        }
+    }
+
+    function reactToHeart(){
+        taps++;
+
+        const heart = $("mainHeart");
+        const rect = heart.getBoundingClientRect();
+
+        heart.textContent = taps >= 3 ? "♥" : "♡";
+        heart.style.transform = `scale(${1 + Math.min(taps,5)*.035})`;
+
+        spark(rect.left + rect.width/2, rect.top + rect.height/2, 7);
+
+        if(taps >= 2) floatHeart(rect.left + rect.width/2, rect.top + rect.height/2);
+
+        $("tapCounter").textContent =
+            taps < 5 ? "you can keep clicking it" : "";
+
+        if(taps <= discoveries.length){
+            const d = $("discovery");
+            d.textContent = discoveries[taps-1];
+            d.classList.remove("show");
+            void d.offsetWidth;
+            d.classList.add("show");
+            setTimeout(() => d.classList.remove("show"), 900);
+        }
+
+        if(taps === 5){
+            $("openingLead").innerHTML =
+                "okay maybe i got a little carried away<br>with this";
+            $("openingTiny").textContent =
+                "press the button whenever you're ready";
+            heartBurst(6);
+        }
+    }
+
+    function begin(){
+        started = true;
+        heartBurst(10);
+        showPanel("storyPanel");
+        storyIndex = 0;
+        typeStory();
+    }
+
+    function typeStory(){
+        const box = $("storyText");
+        box.textContent = "";
+
+        if(typingTimer) clearInterval(typingTimer);
+
+        const line = story[storyIndex];
+        let i = 0;
+
+        typingTimer = setInterval(() => {
+            box.textContent += line[i];
+            i++;
+
+            if(i >= line.length){
+                clearInterval(typingTimer);
+                typingTimer = null;
+            }
+        }, 28);
+
+        $("storyQuiet").textContent =
+            storyIndex < 3 ? "keep going" :
+            storyIndex < 7 ? "okay i'm getting serious now" :
+            "yeah... that's pretty much it";
+    }
+
+    function nextStory(){
+        if(typingTimer){
+            clearInterval(typingTimer);
+            typingTimer = null;
+            $("storyText").textContent = story[storyIndex];
+            return;
+        }
+
+        storyIndex++;
+
+        if(storyIndex >= story.length){
+            showFinal();
+            return;
+        }
+
+        spark(window.innerWidth/2, window.innerHeight/2, 5);
+        typeStory();
+    }
+
+    function showFinal(){
+        showPanel("finalPanel");
+        setTimeout(() => {
+            for(let i=0;i<12;i++){
+                setTimeout(() => {
+                    floatHeart(
+                        Math.random()*window.innerWidth,
+                        window.innerHeight + 20
+                    );
+                }, i*90);
+            }
+        }, 250);
+    }
+
+    function finalMoment(){
+        const centerX = window.innerWidth/2;
+        const centerY = window.innerHeight/2;
+
+        spark(centerX, centerY, 24);
+
+        for(let i=0;i<38;i++){
+            setTimeout(() => {
+                floatHeart(
+                    Math.random()*window.innerWidth,
+                    window.innerHeight + 20
+                );
+            }, i*65);
+        }
+
+        $("finalPanel").animate(
+            [
+                {transform:"scale(1)"},
+                {transform:"scale(1.012)"},
+                {transform:"scale(1)"}
+            ],
+            {duration:1200,easing:"ease-in-out"}
+        );
+    }
+
+    $("mainHeart").addEventListener("click", reactToHeart);
+    $("startBtn").addEventListener("click", begin);
+    $("nextBtn").addEventListener("click", nextStory);
+    $("lastBtn").addEventListener("click", finalMoment);
+
+    document.addEventListener("mousemove", (e) => {
+        const x = (e.clientX / window.innerWidth) - .5;
+        const y = (e.clientY / window.innerHeight) - .5;
+
+        $("orbA").style.transform =
+            `translate(${x*24}px,${y*18}px)`;
+
+        $("orbB").style.transform =
+            `translate(${x*-20}px,${y*-16}px)`;
+
+        $("orbC").style.transform =
+            `translate(${x*12}px,${y*10}px)`;
+    });
+
+    document.addEventListener("pointerdown", (e) => {
+        if(Math.random() < .35){
+            spark(e.clientX, e.clientY, 3);
+        }
+    });
+</script>
+
+</body>
+</html>
